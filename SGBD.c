@@ -84,8 +84,7 @@ void CriarTabela () {
 	}
 	else {
 		for (i = 0; i < tamanho; ++i){
-			fprintf(arquivo2, "%s;%s", colunas [i], tipos [i] );
-			fprintf(arquivo2, "\n");
+			fprintf(arquivo2, "%s;%s\n", colunas [i], tipos [i] );
 		}
 	}
 	fclose(arquivo2);
@@ -169,9 +168,11 @@ void AdicionarLinhaTabela(){
 
 	tamanho = nLinhas;
 
+
 	//CRIAR COLUNAS [I] E TIPOS[I] COM OS DADOS DA TABELA META
 	char colunas[tamanho][30];
 	char tipos[tamanho][30];
+	char novaLinha[tamanho][30];
 
 	FILE *arquivo2;
 	arquivo2 = fopen(tabelaMeta,"rb");
@@ -180,14 +181,25 @@ void AdicionarLinhaTabela(){
 	}
 	else {
 		for (int i = 0; i < tamanho; ++i){
-			
+			fscanf(arquivo2,"%s;%s\n", colunas [i], tipos [i]);
 		}
 	}
 	fclose(arquivo2);
 
+		printf("colunas\n");
+	for (int i = 0; i < tamanho; ++i){
+
+			printf(" %s \n", colunas [i]);
+		}
+			printf("tipos\n");
+		for (int i = 0; i < tamanho; ++i){
+
+			printf(" %s \n", tipos [i]);
+		}
+
 	//UTILIZAR COLUNAS [I] PARA PEDIR DADOS DE NOVALINHA[I] E TIPOS [I] PARA CHECAR SEUS TIPOS + CHECAR SE ID JÁ ESTÁ SENDO UTILIZADO
 
-	//ADICIONAR DADOS AO ARQUIVO DA TABELA DE DADOS
+	//ADICIONAR DADOS AO ARQUIVO DA TABELA DE DADOS (append no arquivo)
 
 
 }
