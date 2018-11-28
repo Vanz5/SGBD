@@ -205,6 +205,70 @@ void AdicionarLinhaTabela(){
 
 }
 
+void ApagarLinha(){
+	char titulo [30];
+	char tabelaDados [40];
+	char extensao[] = ".txt\0";
+	char c;
+    int idParaApagar;
+	int i = 0;
+	FILE *arquivo1, *arquivo2;
+
+    // PEGANDO O NOME DA TABELA PARA PODER SABER QUAIS ARQUIVOS MANIPULAR
+	printf ("Insira o nome da tabela desejada:\n");
+	scanf("%s", &titulo);
+	
+	strcpy (tabelaDados, titulo);
+
+	strcat (tabelaDados, extensao);
+
+
+	// ABRINDO A TABELA PRA LER
+    arquivo1 = fopen(tabelaDados, "r");
+    c = getc(arquivo1);
+   while (c != EOF)
+    {
+        printf("%c", c);
+        c = getc(arquivo1);
+    }
+
+    rewind(arquivo1);
+    printf(" \nDigite a id da linha que deseja apagar:");
+    scanf("%d", &idParaApagar);
+    arquivo2 = fopen("replica.c", "w");
+    c = 'A';
+    while (c != EOF)
+    {
+        c = getc(arquivo1);
+        // EXCETO A LINHA A SER EXCLUÍDA
+        if (c == idParaApagar)
+        {
+			i = 1;
+
+			if (c == '\n') {
+				i = 0;
+			}
+        }
+        //COPIAR AS LINHAS PARA replica.c
+		if (i == 0) {
+			putc(c, arquivo2);
+		}
+    }
+    fclose(arquivo1);
+    fclose(arquivo2);
+    remove(tabelaDados);
+    //RENOMEAR replica.c PARA O NOME DO ARQUIVO ORIGINAL
+    rename("replica.c", tabelaDados);
+    arquivo1 = fopen(tabelaDados, "r");
+    c = getc(arquivo1);
+    while (c != EOF)
+    {
+        printf("%c", c);
+        c = getc(arquivo1);
+    }
+    fclose(arquivo1);
+}
+
 void ApagaTabela(){
 	int teste;
 	char titulo [30];
@@ -265,6 +329,9 @@ void Menu () {
 			//case 4:
 			//	ListarUmaTabela();
 			//	break;
+			case 6:
+				ApagarLinha();
+				break;
 			case 7:
 				ApagaTabela();
 				break;	
