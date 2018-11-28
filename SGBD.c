@@ -233,7 +233,7 @@ void ApagarLinha(){
     }
 
     rewind(arquivo1);
-    printf(" \nDigite a id da linha que deseja apagar:");
+    printf(" \nDigite a id da linha que deseja apagar:"); //por enquanto usaremos o numero da linha
     scanf("%d", &idParaApagar);
     arquivo2 = fopen("replica.c", "w");
     c = 'A';
@@ -241,17 +241,12 @@ void ApagarLinha(){
     {
         c = getc(arquivo1);
         // EXCETO A LINHA A SER EXCLUÍDA
-        if (c == idParaApagar)
-        {
-			i = 1;
-
-			if (c == '\n') {
-				i = 0;
-			}
-        }
-        //COPIAR AS LINHAS PARA replica.c
-		if (i == 0) {
+        if (i != idParaApagar){
+        //COPIAR AS LINHAS PARA replica.c	
 			putc(c, arquivo2);
+        }
+		if (c == '\n') {
+			i++;
 		}
     }
     fclose(arquivo1);
