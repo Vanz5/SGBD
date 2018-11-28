@@ -138,6 +138,7 @@ void AdicionarLinhaTabela(){
 	char meta[] = "Meta.txt\0";
 	int nLinhas;
 	char c;
+	int i;
 
 	// PEGANDO O NOME DA TABELA PARA PODER SABER QUAIS ARQUIVOS MANIPULAR
 	printf ("Insira o nome da tabela desejada:\n");
