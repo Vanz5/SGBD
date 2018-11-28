@@ -204,6 +204,38 @@ void AdicionarLinhaTabela(){
 
 }
 
+void ApagaTabela(){
+	int teste;
+	char titulo [30];
+	char tabelaDados [40];
+	char tabelaMeta [50];
+	char extensao[] = ".txt\0";
+	char meta[] = "Meta.txt\0";
+
+	printf ("Insira o nome da tabela que deve ser apagada:\n");
+	scanf("%s", &titulo);
+	
+	strcpy (tabelaDados, titulo);
+	strcpy (tabelaMeta, titulo);
+
+	strcat (tabelaDados, extensao);
+	strcat (tabelaMeta, meta);
+
+	//APAGANDO A TABELA
+	gets(tabelaDados);
+	teste = remove(tabelaDados);
+
+	if (teste == 0){
+		printf("Tabela %s apagada com sucesso\n",tabelaDados);
+	}
+	else{
+		perror("Ocorreu o seguinte erro ao tentar apagar tabela");
+	}
+	//APAGANDO A TABELA DE METADADOS
+
+	//REMOVER O NOME DA TABELA DO ARQUIVO DE TABELAS
+}
+
 void Menu () {
 
 	int opcao = 0;
@@ -212,7 +244,7 @@ void Menu () {
 
 	do {
 		printf ("\n\nPara realizar a função desejada, digite: \n\n");
-		printf ("1 - Criar tabela\n2 - Listar todas as tabelas\n3 - Criar uma nova linha na tabela\n4 - Listar todos os dados de uma tabela\n");
+		printf ("1 - Criar tabela\n2 - Listar todas as tabelas\n3 - Criar uma nova linha na tabela\n4 - Listar todos os dados de uma tabela\n5 - Pesquisar valor em uma tabela\n6 - Apagar valor de uma tabela\n7 - Apagar uma tabela\n");
 		printf ("0 - Sair\n\n");
 		printf ("Opção: ");
 		scanf ("%i", &opcao);
@@ -231,7 +263,10 @@ void Menu () {
 				break;
 			//case 4:
 			//	ListarUmaTabela();
-			//	break;	
+			//	break;
+			case 7:
+				ApagaTabela();
+				break;	
 			default:
 				printf ("Opção inválida, tente novamente.\n");
 				break;
