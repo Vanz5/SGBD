@@ -56,19 +56,32 @@ void CriarTabela () {
 		tipoValido = 1;
 
 		while (tipoValido != 0) {
-			if (strcmp (tipos [i], "char\0")) {
-				tipoValido = 0;
-			} else if (strcmp (tipos [i], "int\0")) {
-				tipoValido = 0;
-			} else if (strcmp (tipos [i], "float\0")) {
-				tipoValido = 0;
-			} else if (strcmp (tipos [i], "double\0")) {
-				tipoValido = 0;
-			} else if (strcmp (tipos [i], "string\0")) {
-				tipoValido = 0;
+			tipoValido = strcmp (tipos [i], "char\0");
+			if (tipoValido == 0) {
+				break;
 			} else {
-				printf("Tipo inválido, tente novamente (char, int, float, double ou string):\n");
-				scanf("%s", &tipos[i]);
+				tipoValido = strcmp (tipos [i], "int\0");
+				if (tipoValido == 0) {
+					break;
+				} else {
+					tipoValido = strcmp (tipos [i], "float\0");
+					if (tipoValido == 0) {
+						break;
+					} else {
+						tipoValido = strcmp (tipos [i], "double\0");
+						if (tipoValido == 0) {
+							break;
+						} else {
+							tipoValido = strcmp (tipos [i], "string\0");
+							if (tipoValido == 0) {
+								break;
+							} else {
+								printf("Tipo inválido, tente novamente (char, int, float, double ou string):\n");
+								scanf("%s", &tipos[i]);
+							}
+						}
+					}
+				}
 			}
 		}
 
@@ -350,9 +363,11 @@ void ApagarLinha(){
 	char tabelaDados [40];
 	char extensao[] = ".txt\0";
 	char c;
-    int idParaApagar;
+    char idParaApagar[30];
 	int i = 0;
 	FILE *arquivo1, *arquivo2;
+	const char separador[2] = ";";
+	const char separadorN[2] = "\n";
 
     // PEGANDO O NOME DA TABELA PARA PODER SABER QUAIS ARQUIVOS MANIPULAR
 	printf ("Insira o nome da tabela desejada:\n");
@@ -362,26 +377,91 @@ void ApagarLinha(){
 
 	strcat (tabelaDados, extensao);
 
+    //SALVANDO AS CHAVES PRIMARIAS
+
+	//CONTAR LINHAS DA TABELA
+
+	int nLinhasDados;
+
+	FILE *arquivo3;
+	arquivo3 = fopen(tabelaDados,"rb");
+	if(arquivo3 == NULL){
+		printf("Erro na abertura do arquivo!\n");
+	}
+	else {
+		nLinhasDados = 0;
+		for (c = getc(arquivo3); c != EOF; c = getc(arquivo3)){
+			if (c == '\n'){
+				nLinhasDados++;
+			} 
+		}
+	}
+	fclose(arquivo3);
+
+	char chaves[nLinhasDados][30];
+	char *token1;
+	char *token2;
+
+	//GERANDO VETOR PARA SALVAR AS CHAVES 
+
+	FILE *arquivo4;
+	arquivo4 = fopen(tabelaDados,"rb");
+	if(arquivo4 == NULL){
+		printf("Erro na abertura do arquivo!\n");
+	}
+	else{
+		i = 0 ;
+		char * buffer = malloc( sizeof( char ) * 101 );
+		while( fgets( buffer , 100, arquivo4 ) != NULL ){
+			token1 = strtok(buffer,separadorN);
+			token2 = strtok(token1,separador);
+			strcpy(chaves [i],token2);
+			i++;
+			token1 = strtok(NULL,separadorN);
+		}
+		fclose( arquivo4 );
+		free( buffer );
+	}
+
+	for (i = 0; i < nLinhasDados; i++) {
+		printf("%s\n", chaves[i]);
+	}
+
+	printf(" \nDigite a id da linha que deseja apagar:"); //por enquanto usaremos o numero da linha
+    scanf("%s", &idParaApagar);
+
+    int idCorreto = 1;
+    int linhaParaApagar;
+
+    for (i = 1; i < nLinhasDados; i++) {
+    	idCorreto = strcmp (idParaApagar, chaves[i]);
+
+    	if (idCorreto == 0) {
+    		linhaParaApagar = i;
+    		break;
+    	}
+    }
 
 	// ABRINDO A TABELA PRA LER
     arquivo1 = fopen(tabelaDados, "r");
     c = getc(arquivo1);
-   while (c != EOF)
+
+    i = 0;
+
+   	while (c != EOF)
     {
         printf("%c", c);
         c = getc(arquivo1);
     }
 
     rewind(arquivo1);
-    printf(" \nDigite a id da linha que deseja apagar:"); //por enquanto usaremos o numero da linha
-    scanf("%d", &idParaApagar);
-    arquivo2 = fopen("replica.c", "w");
+    arquivo2 = fopen("replica.c", "wb");
     c = 'A';
     while (c != EOF)
     {
         c = getc(arquivo1);
         // EXCETO A LINHA A SER EXCLUÍDA
-        if (i != idParaApagar){
+        if (i != linhaParaApagar){
         //COPIAR AS LINHAS PARA replica.c	
 			putc(c, arquivo2);
         }
@@ -391,18 +471,23 @@ void ApagarLinha(){
     }
     fclose(arquivo1);
     fclose(arquivo2);
-    remove(tabelaDados);
-    //RENOMEAR replica.c PARA O NOME DO ARQUIVO ORIGINAL
-    rename("replica.c", tabelaDados);
-    arquivo1 = fopen(tabelaDados, "r");
-    c = getc(arquivo1);
-    while (c != EOF)
-    {
-        printf("%c", c);
-        c = getc(arquivo1);
+
+    arquivo1 = fopen ("replica.c", "r");
+    arquivo2 = fopen (tabelaDados, "wb");
+
+    c = 'A';
+
+    while (c != EOF) {
+    	c = getc(arquivo1);
+    	putc(c, arquivo2);
     }
+
     fclose(arquivo1);
+    fclose(arquivo2);
+
+    remove("replica.c");
 }
+
 
 void ApagaTabela(){
 	int teste;
@@ -452,7 +537,7 @@ void Menu () {
 
 	do {
 		printf ("\n\nPara realizar a função desejada, digite: \n\n");
-		printf ("1 - Criar tabela\n2 - Listar todas as tabelas\n3 - Criar uma nova linha na tabela\n4 - Listar todos os dados de uma tabela\n5 - Pesquisar valor em uma tabela\n6 - Apagar valor de uma tabela\n7 - Apagar uma tabela\n");
+		printf ("1 - Criar tabela\n2 - Listar todas as tabelas\n3 - Criar uma nova linha na tabela\n4 - Listar todos os dados de uma tabela\n6 - Apagar valor de uma tabela\n7 - Apagar uma tabela\n");
 		printf ("0 - Sair\n\n");
 		printf ("Opção: ");
 		scanf ("%i", &opcao);
