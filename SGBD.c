@@ -52,7 +52,7 @@ void CriarTabela () {
 		scanf("%s", &tipos[i]);
 		
 		// CHECAR SE O TIPO DIGITADO É VÁLIDO
-		/*
+		
 		tipoValido = 1;
 
 		while (tipoValido != 0) {
@@ -70,7 +70,7 @@ void CriarTabela () {
 				printf("Tipo inválido, tente novamente (char, int, float, double ou string):\n");
 				scanf("%s", &tipos[i]);
 			}
-		}*/
+		}
 
 		// CHECAR SE O TIPO DIGITADO É VÁLIDO - FIM
 	}
@@ -92,7 +92,7 @@ void CriarTabela () {
 	// CRIANDO TABELA DE METADADOS - FIM
 
 	//CRIANDO TABELA COM OS DADOS
-		FILE *arquivo3;
+	FILE *arquivo3;
 	arquivo3 = fopen(tabelaDados,"wb+");
 	if(arquivo3== NULL){
 		printf("Erro na abertura do arquivo!\n");
@@ -101,11 +101,11 @@ void CriarTabela () {
 		for (int i = 0; i < tamanho - 1; i++){
 			fprintf(arquivo3, "%s;", colunas [i] );
 		}
-		fprintf(arquivo3, "%s \n", colunas [tamanho - 1]);
+		fprintf(arquivo3, "%s\n", colunas [tamanho - 1]);
 		for (int i = 0; i < tamanho - 1; i++){
 			fprintf(arquivo3, "%s;", tipos [i] );
 		}
-		fprintf(arquivo3, "%s \n",tipos [tamanho - 1]);
+		fprintf(arquivo3, "%s\n",tipos [tamanho - 1]);
 	}
 	fclose(arquivo3);
 	
@@ -138,7 +138,6 @@ void AdicionarLinhaTabela(){
 	char meta[] = "Meta.txt\0";
 	int nLinhas;
 	char c;
-	int i;
 
 	// PEGANDO O NOME DA TABELA PARA PODER SABER QUAIS ARQUIVOS MANIPULAR
 	printf ("Insira o nome da tabela desejada:\n");
@@ -174,35 +173,176 @@ void AdicionarLinhaTabela(){
 	char colunas[tamanho][30];
 	char tipos[tamanho][30];
 	char novaLinha[tamanho][30];
+	const char separador[2] = ";";
+	const char separadorN[2] = "\n";
+	char *token;
+	char *token2;
+	int tamanhoDobro;
+	int i = 0;
+
+	tamanhoDobro = 2*tamanho;
+	char auxiliar[tamanhoDobro][30];
 
 	FILE *arquivo2;
 	arquivo2 = fopen(tabelaMeta,"rb");
 	if(arquivo2 == NULL){
 		printf("Erro na abertura do arquivo!\n");
 	}
-	else {
-		for (int i = 0; i < tamanho; ++i){
-			fscanf(arquivo2,"%s;%s\n", colunas [i], tipos [i]);
+	else{
+		char * buffer = malloc( sizeof( char ) * 101 );
+		while( fgets( buffer , 100, arquivo2 ) != NULL ){
+			token = strtok(buffer,separadorN);
+			while(token!=NULL){
+				token2 = strtok(token,separador);
+				while(token2!=NULL){
+					strcpy(auxiliar [i],token2);
+					i++;
+					token2 = strtok(NULL,separador);
+				}	
+				token = strtok(NULL,separadorN);
+			}
+		}
+		fclose( arquivo2 );
+		free( buffer );
+	}
+
+	int j = 0;
+	int k = 0;
+	for (int i = 0; i < tamanhoDobro; ++i){
+		if(i%2==0){
+			strcpy(colunas [j],auxiliar [i]);
+			j++;
+		}
+		else{
+			strcpy(tipos [k],auxiliar [i]);
+			k++;
 		}
 	}
-	fclose(arquivo2);
 
-		printf("colunas\n");
-	for (int i = 0; i < tamanho; ++i){
+	//SALVANDO AS CHAVES PRIMARIAS
 
-			printf(" %s \n", colunas [i]);
+	//CONTAR LINHAS DA TABELA
+
+	int nLinhasDados;
+
+	FILE *arquivo4;
+	arquivo4 = fopen(tabelaDados,"rb");
+	if(arquivo4 == NULL){
+		printf("Erro na abertura do arquivo!\n");
+	}
+	else {
+		nLinhasDados = 0;
+		for (c = getc(arquivo4); c != EOF; c = getc(arquivo)){
+			if (c == '\n'){
+				nLinhasDados++;
+			} 
 		}
-			printf("tipos\n");
-		for (int i = 0; i < tamanho; ++i){
+	}
+	fclose(arquivo4);
 
-			printf(" %s \n", tipos [i]);
+	char chaves[nLinhasDados][30];
+	char *token3;
+	char *token4;
+
+	//GERANDO VETOR PARA SALVAR AS CHAVES 
+
+	FILE *arquivo5;
+	arquivo5 = fopen(tabelaDados,"rb");
+	if(arquivo5 == NULL){
+		printf("Erro na abertura do arquivo!\n");
+	}
+	else{
+		i = 0 ;
+		char * buffer = malloc( sizeof( char ) * 101 );
+		while( fgets( buffer , 100, arquivo5 ) != NULL ){
+			token3 = strtok(buffer,separadorN);
+			token4 = strtok(token3,separador);
+			strcpy(chaves [i],token4);
+			i++;
+			token3 = strtok(NULL,separadorN);
 		}
+		fclose( arquivo5 );
+		free( buffer );
+	}		
+
 
 	//UTILIZAR COLUNAS [I] PARA PEDIR DADOS DE NOVALINHA[I] E TIPOS [I] PARA CHECAR SEUS TIPOS + CHECAR SE ID JÁ ESTÁ SENDO UTILIZADO
 
-	//ADICIONAR DADOS AO ARQUIVO DA TABELA DE DADOS (append no arquivo)
+
+	//TESTE COM A CHAVE PRIMARIA
+	int ret;
+
+	printf("\nInsira o %s da nova linha:\n",colunas [0]);
+	scanf("%s", &novaLinha[0]);
+
+	for (int i = 2; i < nLinhasDados - 1; ++i){
+		ret = strcmp(novaLinha[0],chaves [i]);
+		if(ret==0){
+			printf("Este %s já está sendo utilizado\n",colunas [0]);
+			break;
+		}
+	}
+
+	if (ret!=0){
+		for (int i = 1; i < tamanho; ++i){
+			printf("\nInsira o %s da nova linha:\n",colunas [i]);
+			scanf("%s", &novaLinha[i]);
+
+		}
 
 
+		//ADICIONAR DADOS AO ARQUIVO DA TABELA DE DADOS (append no arquivo)
+		FILE *arquivo3;
+		arquivo3 = fopen(tabelaDados,"ab+");
+		if(arquivo3== NULL){
+			printf("Erro na abertura do arquivo!\n");
+		}
+		else{
+			for (int i = 0; i < tamanho - 1; i++){
+				fprintf(arquivo3, "%s;", novaLinha [i] );
+			}
+			fprintf(arquivo3, "%s\n", novaLinha [tamanho - 1]);
+		}
+		fclose(arquivo3);
+	}
+
+}
+
+void ListarUmaTabela(){
+	char titulo [30];
+	char tabelaDados [40];
+	char extensao[] = ".txt\0";
+	const char separador[2] = ";";
+	char *token;
+
+	// PEGANDO O NOME DA TABELA PARA PODER SABER QUAIS ARQUIVOS MANIPULAR
+	printf ("Insira o nome da tabela desejada:\n");
+	scanf("%s", &titulo);
+	
+	strcpy (tabelaDados, titulo);
+	strcat (tabelaDados, extensao);
+
+	printf("\n\n");
+	printf("Segue a tabela %s:\n",titulo);
+
+	//ABRINDO O ARQUIVO PARA LEITURA DO MESMO
+	FILE *arquivo;
+	arquivo = fopen(tabelaDados,"rb+");
+	if(arquivo== NULL){
+		printf("Erro na abertura do arquivo!\n");
+	}
+	else{
+		char * buffer = malloc( sizeof( char ) * 101 );
+		while( fgets( buffer , 100, arquivo ) != NULL ){
+			token = strtok(buffer,separador);
+			while(token!=NULL){
+				printf("\t%s",token);
+				token = strtok(NULL,separador);
+			}
+		}
+		fclose( arquivo );
+		free( buffer );
+	}
 }
 
 void ApagarLinha(){
@@ -281,8 +421,7 @@ void ApagaTabela(){
 	strcat (tabelaDados, extensao);
 	strcat (tabelaMeta, meta);
 
-	//APAGANDO A TABELA
-	gets(tabelaDados);
+	//APAGANDO A TABELA 
 	teste = remove(tabelaDados);
 
 	if (teste == 0){
@@ -292,6 +431,15 @@ void ApagaTabela(){
 		perror("Ocorreu o seguinte erro ao tentar apagar tabela");
 	}
 	//APAGANDO A TABELA DE METADADOS
+
+  teste = remove(tabelaMeta);
+
+	if (teste == 0){
+		printf("Tabela %s apagada com sucesso\n",tabelaMeta);
+	}
+	else{
+		perror("Ocorreu o seguinte erro ao tentar apagar tabela");
+	}
 
 	//REMOVER O NOME DA TABELA DO ARQUIVO DE TABELAS
 }
@@ -321,9 +469,9 @@ void Menu () {
 			case 3:
 				AdicionarLinhaTabela();
 				break;
-			//case 4:
-			//	ListarUmaTabela();
-			//	break;
+			case 4:
+				ListarUmaTabela();
+				break;
 			case 6:
 				ApagarLinha();
 				break;
